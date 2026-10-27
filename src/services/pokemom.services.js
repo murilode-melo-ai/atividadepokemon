@@ -1,39 +1,21 @@
-import { knex } from "../database/knex.js"
+import { knex } from "../database/knex.js";
+import { pokemonRoutes } from "../routes/pokemon.routes.js";
 
-
-class PokemonServices {
-
+class PokemonService {
     async getAll() {
-        const res = await knex("pokemons");
-        return res;
+        const pokemons = await knex("pokemon").select("*");
+        return pokemons;
+    }
+
+    async getById(id) {
+        const pokemon = await knex("pokemon").where({ id }).first();
+        return pokemon;
     }
 
     async create(pokemon) {
-        const res = await knex("pokemons").insert(pokemon);
-        return res.raws[0];
+        const [newPokemon] = await knex("pokemon").insert(pokemon).returning("*");
+        return newPokemon;
     }
-    
-
 }
 
-export const pokemonService = new PokemonServices();
-
-
-router.put("/:id", async (req, res) => {
-    try {
-        const pokemon = await pokemonService.update(req.params.id, req.body);
-        return res.json(pokemon);
-    } catch (error) {
-        return res.status(500).json({ error: error.message });
-    }
-});
-
-
-router.patch("/:id", async (req, res) => {
-    try {
-        const pokemon = await pokemonService.update(req.params.id, req.body);
-        return res.json(pokemon);
-    } catch (error) {
-        return res.status(500).json({ error: error.message });
-    }
-});
+export const pokemonService = new PokemonService();
